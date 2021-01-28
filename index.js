@@ -8,19 +8,23 @@ app.use(express.urlencoded({ extended: true })); // for parsing application/x-ww
 // app.use(express.bodyParser({limit: '50mb'}));
 var cors = require("cors");
 app.use(cors());
-
-// respond with "hello world" when a GET request is made to the homepage
+//Save data
 app.post("/save", function (req, res) {
   // console.log(req.body)
   console.log("data saved");
   data = req.body;
   res.json({ res: "hello world" });
 });
-
-// respond with "hello world" when a GET request is made to the homepage
+//Get data
 app.get("/get", function (req, res) {
   console.log("hit get");
   res.json(data);
+});
+
+//test
+app.get("/test", function (req, res) {
+  console.log("hit test");
+  res.json({ ok: "ok" });
 });
 
 const PORT = 1338;
