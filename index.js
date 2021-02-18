@@ -10,26 +10,38 @@ app.use(express.urlencoded({ extended: true })); // for parsing application/x-ww
 var cors = require("cors");
 app.use(cors());
 
-getDataFromRemote();
+getDataFromFile();
+async function getDataFromFile() {
+  data = await fs.readFile("./cache.json", "utf8");
+  data = JSON.parse(data);
+  console.log(data);
+}
+// getDataFromRemote();
 //get data from Jt
 async function getDataFromRemote() {
-  data = await rp("http://192.168.1.13:1338/get");
-  // data = JSON.parse(data);
-  if (!data) return;
   try {
+    let IP = "192.168.1.3";
+    console.log(`Fetching from remote cache server ${IP}`);
+    data = await rp(`http://${IP}:1338/get`);
+    if (!data) return;
     await fs.writeFile("./cache.json", data, "utf8");
     console.log("success!");
+    data = JSON.parse(data);
   } catch (err) {
-    console.error(err);
+    console.log("Error trying to fetch from a remote cache server.");
+    // console.error(err);
   }
 }
 //Save data
-app.post("/save", function (req, res) {
+app.post("/save", async function (req, res) {
   // console.log(req.body)
-  console.log("data saved");
   data = req.body;
+  await fs.writeFile("./cache.json", data, "utf8");
+
+  console.log("data saved");
   res.json({ res: "hello world" });
 });
+
 //Get data
 app.get("/get", function (req, res) {
   console.log("hit get");
