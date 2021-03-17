@@ -4,6 +4,7 @@ var fs = require("fs-extra");
 var app = express();
 
 let data = {};
+const cacheFileName = "./cache.json";
 app.use(express.json({ limit: "3000mb" })); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 // app.use(express.bodyParser({limit: '50mb'}));
@@ -12,9 +13,21 @@ app.use(cors());
 
 getDataFromFile();
 async function getDataFromFile() {
-  data = await fs.readFile("./cache.json", "utf8");
-  data = JSON.parse(data);
-  console.log(data);
+  try {
+    data = await fs.readFile(cacheFileName, "utf8");
+    if (!data) {
+      data = {};
+    } else {
+      data = JSON.parse(data);
+      console.log("Data is initialized");
+    }
+  } catch (err) {
+    console.log(err);
+    if (err.message.includes("ENOENT")) {
+      await fs.writeJson(cacheFileName, {});
+      console.log("Created empty cache file");
+    }
+  }
 }
 // getDataFromRemote();
 //get data from Jt
@@ -36,7 +49,7 @@ async function getDataFromRemote() {
 app.post("/save", async function (req, res) {
   // console.log(req.body)
   data = req.body;
-  await fs.writeFile("./cache.json", data, "utf8");
+  await fs.writeFile("./cache.json", JSON.stringify(data), "utf8");
 
   console.log("data saved");
   res.json({ res: "hello world" });
